@@ -151,7 +151,7 @@ COPYRIGHT & LICENSE
     This distribution, including all of the files in the Net::validMX
     package, is free software; you can redistribute it and/or modify it
     under the Perl Artistic License v1.0 available at
-    http://www.perlfoundation.org/legal/licenses/artistic-1_0.html
+    https://www.perlfoundation.org/artistic-license-10.html
 
     perlartistic
 
