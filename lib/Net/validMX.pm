@@ -18,7 +18,7 @@ BEGIN {
     require Exporter;
 
     @ISA     = qw(Exporter DynaLoader);
-    $VERSION = '2.5.0';
+    $VERSION = '2.5.1';
     $DEBUG   = 0;
     $ALLOW_IP_ADDRESS_AS_MX = 1;
     $FLAG_INTRANETS = 1;
@@ -820,7 +820,7 @@ L<perlartistic>
 =head1 AUTHOR INFORMATION
 
 Kevin A. McGrail
-kevin.mcgrail-netvalidmx@pccc.com
+kevin.mcgrail-netvalidmx@mcgrail.com
 
 =head1 UPDATE HISTORY
 
@@ -838,11 +838,13 @@ kevin.mcgrail-netvalidmx@pccc.com
 
 =item v2.5  Released May 8, 2020.  Numerous bug fixes and moved to The McGrail Foundation.  This product is in active use in production system.
 
+=item v2.5.1  In development.  Small documentation bug fixes.
+
 =back
 
 =head1 HOMEPAGE
 
-Releases can be found at http://www.pccc.com/downloads/Net-validMX and
+Releases can be found at http://www.mcgrail.com/downloads/Net-validMX and
 on CPAN at http://search.cpan.org/~kmcgrail/.
 
 =head1 CAVEATS
