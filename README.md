@@ -165,26 +165,31 @@ UPDATE HISTORY
     Small efficiency change to short-circuit the DNS resolution of an IP
     address.
     v2.2 Released May 31, 2006. Clarified the LICENSE by pointing readers to
-    the README. Added functions check_email_and_mx & check_email_validity.
+    the README.
+    Added functions check_email_and_mx & check_email_validity.
     Expanded documentation and added check_email_and_mx &
     check_email_validity calls to example. Cleaned up distribution
-    production. Changed logic to check MX records that resolve to IPs to see
+    production.
+    Changed logic to check MX records that resolve to IPs to see
     if it is privatized first.
-    v2.3 & 2.4 Unreleased. Clarified the license in the Makefile.PL as
-    artistic rather than perl. Continued documentation cleanup. Submitted
-    for namespace registration with CPAN. Added = to chars for a username in
-    the check_email_validity function. Add test case for Test for DNS where
-    MX1 is private, MX2 is private but MX3 is a valid internet address for a
-    pass. Began adding overloaded parameters to check_valid_mx to add
-    flexibility to override default settings. Added AAAA records as valid
-    for IPv6 support. Rewrote all tests to rely on test points inside a
-    domain we control so that testing passes in the future.
+    v2.3 & 2.4 Unreleased.
+    Clarified the license in the Makefile.PL as artistic rather than perl.
+    Continued documentation cleanup. Submitted for namespace registration with CPAN.
+    Added = to chars for a username in the check_email_validity function.
+    Add test case for Test for DNS where MX1 is private, MX2 is private 
+    but MX3 is a valid internet address for a pass.
+    Began adding overloaded parameters to check_valid_mx to add
+    flexibility to override default settings.
+    Added AAAA records as valid for IPv6 support.
+    Rewrote all tests to rely on test points inside a domain we control 
+    so that testing passes in the future.
     v2.5 Released May 8, 2020. Numerous bug fixes and moved to The McGrail
-    Foundation. This product is in active use in production system.
+    Foundation.
+    This product is in active use in production system.
 
 HOMEPAGE
-    Releases can be found at http://www.pccc.com/downloads/Net-validMX and
-    on CPAN at http://search.cpan.org/~kmcgrail/.
+    Releases can be found at https://mcgrail.com/downloads/Net-validMX/ and
+    on CPAN at https://metacpan.org/pod/Net::validMX.
 
 CAVEATS
     THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR IMPLIED
