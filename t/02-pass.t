@@ -8,8 +8,8 @@ sub test {
   my ($email) = @_;
   my ($rv, $reason);
 
-  ($rv, $reason) = &Net::validMX::check_valid_mx($email);
-  print &Net::validMX::get_output_result($email, $rv, $reason);
+  ($rv, $reason) = Net::validMX::check_valid_mx($email);
+  print Net::validMX::get_output_result($email, $rv, $reason);
  
   return $rv;
 }
@@ -19,8 +19,8 @@ sub test_params {
 
   my ($rv, $reason);
 
-  ($rv, $reason) = &Net::validMX::check_valid_mx(%params);
-  print &Net::validMX::get_output_result($params{'email'}, $rv, $reason);
+  ($rv, $reason) = Net::validMX::check_valid_mx(%params);
+  print Net::validMX::get_output_result($params{'email'}, $rv, $reason);
 
   return $rv;
 }

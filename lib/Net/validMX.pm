@@ -51,7 +51,7 @@ sub get_output_result {
   my ($email, $rv, $reason) = @_;
   my ($output);
 
-  $output = "$email\n\tValid MX? ".&Net::validMX::int_to_truefalse($rv);
+  $output = "$email\n\tValid MX? ".Net::validMX::int_to_truefalse($rv);
   if ($reason ne '') {
     $output .= " - $reason";
   }
@@ -121,7 +121,7 @@ sub check_valid_mx {
     $res->udp_timeout($params{'query_timeout'});              #Number of Seconds before query will fail
 
     #Strip domain name from an email address
-    $domain = &get_domain_from_email($params{'email'});
+    $domain = get_domain_from_email($params{'email'});
 
     #Deny Explicit IP Address Domains
     if ($domain =~ /^\[.*\]$/) {
@@ -216,7 +216,7 @@ sub check_valid_mx {
             print "DEBUG: $i - Resolution type of ".$answer[$i]->exchange.": ".$answer2[0]->type."\n" if $params{'debug'}; 
             if ($answer2[0]->type eq "A") {
               print "DEBUG: $i - A Name Address for ".$answer[$i]->exchange.": ".$answer2[0]->address."\n" if $params{'debug'};
-              ($rv, $reason) = &invalid_mx($answer2[0]->address);
+              ($rv, $reason) = invalid_mx($answer2[0]->address);
               if ($rv == 1 or ($rv == 2 && $i == $#answer)) {
                 if ($rv == 2) {
                   $reason .= ' - All MX Records Failed';
@@ -241,7 +241,7 @@ sub check_valid_mx {
                   @answer3 = $packet->answer; 
                   print "DEBUG: $i - CNAME Resolution of Type: ".$answer3[0]->type." - Address: ".$answer3[0]->address."\n" if $params{'debug'};
                   if ($answer3[0]->type eq "A") {
-                    ($rv, $reason) = &invalid_mx($answer3[0]->address);
+                    ($rv, $reason) = invalid_mx($answer3[0]->address);
                     if ($rv == 1 or ($rv == 2 && $i == $#answer)) {
                       if ($rv == 2) {
                         $reason .= ' - All MX Records Failed';
@@ -261,7 +261,7 @@ sub check_valid_mx {
                 }
               } else {
                 if ($params{'allow_ip_address_as_mx'} > 0 && $answer[$i]->exchange =~ /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/) {
-                  ($rv, $reason) = &invalid_mx($answer[$i]->exchange);
+                  ($rv, $reason) = invalid_mx($answer[$i]->exchange);
                   if ($rv) {
                     return (0, $reason);
                   } else {
@@ -288,7 +288,7 @@ sub check_valid_mx {
             } else {
               #PERHAPS WE'LL ALLOW AN IP ADDRESS AS AN MX FOR CLOWNS WHO CONFIGURE DNS INCORRECTLY
               if ($params{'allow_ip_address_as_mx'} > 0 && $answer[$i]->exchange =~ /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/) {
-                ($rv, $reason) = &invalid_mx($answer[$i]->exchange);
+                ($rv, $reason) = invalid_mx($answer[$i]->exchange);
                 if ($rv) {
                   return (0, $reason);
                 } else {
@@ -318,7 +318,7 @@ sub check_valid_mx {
     print "DEBUG: Checking Implicit MX is set to $check_implicit_mx\n" if $params{'debug'};
 
     if ($check_implicit_mx > 0) {
-      ($rv, $reason) = &check_implicit_mx($domain, $res, $params{'debug'}, $params{'resolution_problem_return'});
+      ($rv, $reason) = check_implicit_mx($domain, $res, $params{'debug'}, $params{'resolution_problem_return'});
       if (defined $rv) {
         return ($rv, $reason);
       }
@@ -361,7 +361,7 @@ sub check_implicit_mx ($$) {
     @answer = $packet->answer;
     if ($answer[0]->type eq "A") {
       print "DEBUG: $SenderDomain has no MX Records - Using Implicit A Record: ".$answer[0]->address."\n" if $debug;
-      ($rv, $reason) = &invalid_mx($answer[0]->address);
+      ($rv, $reason) = invalid_mx($answer[0]->address);
       if ($rv) {
         print "DEBUG: Test Failed - $reason\n" if $debug;
         return (0, $reason);
@@ -385,7 +385,7 @@ sub check_implicit_mx ($$) {
           @answer2 = $packet->answer;
           if ($answer2[0]->type eq "A") {
              print "DEBUG: CNAME Resolution of Type: ".$answer2[0]->type." - Address: ".$answer2[0]->address."\n" if $debug;
-            ($rv, $reason) = &invalid_mx($answer2[0]->address);
+            ($rv, $reason) = invalid_mx($answer2[0]->address);
             if ($rv > 0) {
               print "DEBUG: Test Failed - $reason\n" if $debug;
               return (0, $reason);
@@ -496,14 +496,14 @@ sub check_email_and_mx {
   print "DEBUG: e-mail address is now: $email<br>\n" if $debug;
 
   # CHECK FOR A VALIDLY CONSTRUCTED E-MAIL ADDRESS
-  ($rv) = &Net::validMX::check_email_validity($email);
+  ($rv) = Net::validMX::check_email_validity($email);
   
   if ($rv < 1) {
     return($rv, "Failed check_email_validity", $email);
   }
 
   # CHECK FOR VALID MX RECORD
-  ($rv, $fail_reason) = &Net::validMX::check_valid_mx($email);
+  ($rv, $fail_reason) = Net::validMX::check_valid_mx($email);
 
   if ($rv < 1) {
     return($rv, $fail_reason, $email);
@@ -702,7 +702,7 @@ To use the module in your programs you will use the line:
 To check if an email address could be valid by checking the DNS, call
 the function check_valid_mx with a single email address as the only argument:
 
-	($rv, $reason) = &Net::validMX::check_valid_mx('kevin.mcgrail@peregrinehw.com');
+	($rv, $reason) = Net::validMX::check_valid_mx('kevin.mcgrail@peregrinehw.com');
 
 check_valid_mx will return a true/false integer as the first value and a descriptive text message as warranted.
 
@@ -714,7 +714,7 @@ NOTE: In the event of a DNS resolution problem, we do NOT return a failure.  We 
 To check if an email address is formatted correctly, call the function
 check_email_validity with a single email address as the only argument:
 
-	$rv = &Net::validMX::check_valid_mx('kevin.mcgrail@peregrinehw.com');
+	$rv = Net::validMX::check_valid_mx('kevin.mcgrail@peregrinehw.com');
 
 check_email_validity will return a true/false integer where > 0 indicates that the email address looks valid.
 
@@ -724,7 +724,7 @@ check_email_validity will return a true/false integer where > 0 indicates that t
 To check if an email address is formatted correctly, sanitize the email address some common end-user errors(*) and run check_valid_mx all from a single function, 
 use the function check_email_and_mx with a single email address as the only argument:
 
-        ($rv, $reason, $sanitized_email) = &Net::validMX::check_valid_mx('kevin.mcgrail@peregrinehw.com');
+        ($rv, $reason, $sanitized_email) = Net::validMX::check_valid_mx('kevin.mcgrail@peregrinehw.com');
 
 check_email_and_mx will return a true/false integer where > 0 indicates that the email address looks valid, a descriptive text message 
 as warranted, and a sanitized version of the email address argument.
@@ -740,19 +740,19 @@ as warranted, and a sanitized version of the email address argument.
 To extract the domain part and local part from an email address, use the function 
 get_domain_from_email with a single email address as the only argument:
 
-	$domain = &Net::validMX::get_domain_from_email('kevin.mcgrail@peregrinehw.com');
+	$domain = Net::validMX::get_domain_from_email('kevin.mcgrail@peregrinehw.com');
 
 get_domain_from_email will return a string with the domain part of the email address argument.
 
 Optionally, you can also receive the local part as well:
 
-        ($local, $domain) = &Net::validMX::get_domain_from_email('kevin.mcgrail@peregrinehw.com');
+        ($local, $domain) = Net::validMX::get_domain_from_email('kevin.mcgrail@peregrinehw.com');
 
 -head2 check_spf_for_domain
 
 To check if a domain is properly configured to send email, call the function check_spf_for_domain with a domain name as the only argument:
 
-	($rv, $reason) = &Net::validMX::check_spf_for_domain('peregrinehw.com');
+	($rv, $reason) = Net::validMX::check_spf_for_domain('peregrinehw.com');
 
 check_spf_for_domain will return "valid", "suspect", or "bad" as the first value and a descriptive text message as warranted.
 
@@ -795,12 +795,12 @@ sub filter_sender {
   my ($rv, $reason);
   #md_syslog('warning', "Testing $sender, $ip, $hostname, $helo");
 
-  if (&is_authorized_sender($sender, $RelayAddr)) {
+  if (is_authorized_sender($sender, $RelayAddr)) {
     return ('CONTINUE', "ok");
   }
 
   if ($sender ne '<>') {
-    ($rv, $reason) = &check_valid_mx($sender);
+    ($rv, $reason) = check_valid_mx($sender);
     unless ($rv) {
       md_syslog('warning', "Rejecting $sender - Invalid MX: $reason.");
       return ('REJECT', "Sorry; $sender has an invalid MX record: $reason.");

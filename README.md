@@ -31,7 +31,7 @@ USE
     the function check_valid_mx with a single email address as the only
     argument:
 
-            ($rv, $reason) = &Net::validMX::check_valid_mx('kevin.mcgrail@peregrinehw.com');
+            ($rv, $reason) = Net::validMX::check_valid_mx('kevin.mcgrail@peregrinehw.com');
 
     check_valid_mx will return a true/false integer as the first value and a
     descriptive text message as warranted.
@@ -44,7 +44,7 @@ USE
     To check if an email address is formatted correctly, call the function
     check_email_validity with a single email address as the only argument:
 
-            $rv = &Net::validMX::check_valid_mx('kevin.mcgrail@peregrinehw.com');
+            $rv = Net::validMX::check_valid_mx('kevin.mcgrail@peregrinehw.com');
 
     check_email_validity will return a true/false integer where > 0
     indicates that the email address looks valid.
@@ -55,7 +55,7 @@ USE
     single function, use the function check_email_and_mx with a single email
     address as the only argument:
 
-            ($rv, $reason, $sanitized_email) = &Net::validMX::check_valid_mx('kevin.mcgrail@peregrinehw.com');
+            ($rv, $reason, $sanitized_email) = Net::validMX::check_valid_mx('kevin.mcgrail@peregrinehw.com');
 
     check_email_and_mx will return a true/false integer where > 0 indicates
     that the email address looks valid, a descriptive text message as
@@ -73,21 +73,21 @@ USE
     function get_domain_from_email with a single email address as the only
     argument:
 
-            $domain = &Net::validMX::get_domain_from_email('kevin.mcgrail@peregrinehw.com');
+            $domain = Net::validMX::get_domain_from_email('kevin.mcgrail@peregrinehw.com');
 
     get_domain_from_email will return a string with the domain part of the
     email address argument.
 
     Optionally, you can also receive the local part as well:
 
-            ($local, $domain) = &Net::validMX::get_domain_from_email('kevin.mcgrail@peregrinehw.com');
+            ($local, $domain) = Net::validMX::get_domain_from_email('kevin.mcgrail@peregrinehw.com');
 
     -head2 check_spf_for_domain
 
     To check if a domain is properly configured to send email, call the
     function check_spf_for_domain with a domain name as the only argument:
 
-            ($rv, $reason) = &Net::validMX::check_spf_for_domain('peregrinehw.com');
+            ($rv, $reason) = Net::validMX::check_spf_for_domain('peregrinehw.com');
 
     check_spf_for_domain will return "valid", "suspect", or "bad" as the
     first value and a descriptive text message as warranted.
