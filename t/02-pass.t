@@ -1,6 +1,7 @@
-#!perl -T
+#!/usr/bin/perl -T
 
-use Test::More tests => 21;
+use Test::More;
+plan tests => 21;
 
 use Net::validMX;
 

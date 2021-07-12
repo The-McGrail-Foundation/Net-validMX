@@ -1,6 +1,7 @@
-#!perl -T
+#!/usr/bin/perl -T
 
-use Test::More tests => 3;
+use Test::More;
+plan tests => 3;
 
 use Net::validMX qw(get_domain_from_email);
 

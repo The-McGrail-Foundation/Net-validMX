@@ -1,6 +1,7 @@
-#!perl -T
+#!/usr/bin/perl -T
 
-use Test::More tests => 6;
+use Test::More;
+plan tests => 6;
 
 use Net::validMX qw(check_email_validity);
 
