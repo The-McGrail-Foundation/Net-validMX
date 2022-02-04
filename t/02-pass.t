@@ -1,7 +1,9 @@
 #!/usr/bin/perl -T
 
+use lib 'lib';
+
 use Test::More;
-plan tests => 21;
+plan tests => 22;
 
 use Net::validMX;
 
@@ -27,6 +29,8 @@ sub test_params {
 }
 
 is( test('kevin.mcgrail@peregrinehw.com'), 1, 'Test for correct DNS - Should Pass');
+
+is( test('test@test12.peregrinehw.com'), 1, 'Test non-rfc compliant DNS using cname for MX - Should Pass');
 
 is( test('test@test13.peregrinehw.com'), 1, 'Test non-rfc compliant DNS using cname for MX - Should Pass');
 

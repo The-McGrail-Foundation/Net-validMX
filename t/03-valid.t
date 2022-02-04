@@ -1,5 +1,7 @@
 #!/usr/bin/perl -T
 
+use lib 'lib';
+
 use Test::More;
 plan tests => 6;
 
