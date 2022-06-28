@@ -28,7 +28,7 @@ if (scalar(@ARGV) > 0) {
     }
   }
 } else {
-  print "Error: Insufficient Number of Arguments\n\n\tperl $0 " . '$email_address' . "\n\n";
+  print "Error: Insufficient Number of Arguments\n\n\t$0 " . '$email_address' . "\n\n";
 }
 
 1;
