@@ -8,6 +8,7 @@ RELEASE
 \bCVS\b
 ,v$
 \B\.svn\b
+\.gitignore$
 # Makemaker generated files and dirs.
 ^MANIFEST\.
 ^Makefile$
@@ -18,3 +19,4 @@ RELEASE
 \.old$
 ^#.*#$
 ^\.#
+\.swp$
