@@ -1,3 +1,5 @@
+[![CI for Net::validMX](https://github.com/The-McGrail-Foundation/Net-validMX/actions/workflows/main.yml/badge.svg)](https://github.com/The-McGrail-Foundation/Net-validMX/actions/workflows/main.yml)
+
 NAME
     Net::validMX - PERL Module to use DNS and/or regular expressions to
     verify if an email address could be valid.
