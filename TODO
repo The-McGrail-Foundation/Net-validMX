@@ -1,0 +1,25 @@
+TODO
+
+- I'd like to clean up the pod text so that the code snippets aren't wrapped by pod2text on the README export.
+
+- I'd like to add more IPv6 support including the use of private network addresses (fc00::/7 & fe80:).
+
+- Need to finish the ability to override default variables, procedural and OO methods and complete the documentation.
+
+SOLVED TODO ITEMS
+
+- I'd like to convert the example script(s) into test script(s).  
+
+SOLVED: Test::More was a great way to achieve this!
+
+- I'd like to know more info on what/how to make a META.yml file.
+
+SOLVED: I was using MakeMaker v6.03.  Instead I upgraded to 6.30 and make dist or make distdir then created the META.yml file.  I also used a trick from Net::DNS' Makefile.PL to add the license, author and abstract data directly to the META.yml file.
+
+- I'd like to make it so that the Makefile.PL creates a README on the fly from the pod in the library instead of pod2text lib/Net/validMX.pm E<gt> README.
+
+SOLVED: Thanks to Andreas J. Koenig for a post he wrote that dealt with my exact problem.  I added the PREOP and DIST_DEFAULT to the Makefile.PL.  I then modified this to use the same MANIFEST trick that is used for metafile and I'm happy with the end result.
+
+SOLVED: /usr/bin/perl is standard, Makefile fixed to install example script to the correct path
+- I'd like to have the example script automatically built to have the correct #!/usr/bin/perl line and possibly installed in /usr/local/bin.
+
