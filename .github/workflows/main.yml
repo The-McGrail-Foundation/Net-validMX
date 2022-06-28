@@ -27,6 +27,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+      - name: Install Perl modules
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install libnet-dns-perl
       - name: build code
         run:  perl Makefile.PL && make
       - name: Regression tests
