@@ -842,8 +842,6 @@ check_email_validity will return a true/false integer where E<gt> 0 indicates th
 
 =head2 check_email_and_mx
 
-=over 4
-
 To check if an email address is formatted correctly, sanitize the email address some common end-user errors(*) and run check_valid_mx all from a single function, 
 use the function check_email_and_mx with a single email address as the only argument:
 
@@ -853,6 +851,8 @@ check_email_and_mx will return a true/false integer where E<gt> 0 indicates that
 as warranted, and a sanitized version of the email address argument.
 
 (*) Common end-user errors that are fixed: 
+
+=over 4
 
 =item All spaces are stripped.  Many users seem to enter things like Bob and Carol @ a big isp.com.
 
@@ -1037,6 +1037,8 @@ SOLVED: Thanks to Andreas J. Koenig for a post he wrote that dealt with my exact
 =head1 CREDITS
 
 =over 4
+
+=encoding utf-8
 
 Based on an idea from Les Miksell and much input from Jan Pieter Cornet.  Additional thanks to David F. Skoll, Matthew van Eerde, and Mark Damrose for testing and suggestions, plus Bill Cole & Karsten Bräckelmann for code contributions.  And sincere apologies in advance if I missed anyone!
 
