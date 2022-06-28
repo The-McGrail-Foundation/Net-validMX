@@ -837,17 +837,19 @@ check_email_validity with a single email address as the only argument:
 
 	$rv = Net::validMX::check_valid_mx('kevin.mcgrail@peregrinehw.com');
 
-check_email_validity will return a true/false integer where > 0 indicates that the email address looks valid.
+check_email_validity will return a true/false integer where E<gt> 0 indicates that the email address looks valid.
 
 
 =head2 check_email_and_mx
+
+=over 4
 
 To check if an email address is formatted correctly, sanitize the email address some common end-user errors(*) and run check_valid_mx all from a single function, 
 use the function check_email_and_mx with a single email address as the only argument:
 
         ($rv, $reason, $sanitized_email) = Net::validMX::check_valid_mx('kevin.mcgrail@peregrinehw.com');
 
-check_email_and_mx will return a true/false integer where > 0 indicates that the email address looks valid, a descriptive text message 
+check_email_and_mx will return a true/false integer where E<gt> 0 indicates that the email address looks valid, a descriptive text message 
 as warranted, and a sanitized version of the email address argument.
 
 (*) Common end-user errors that are fixed: 
@@ -856,7 +858,13 @@ as warranted, and a sanitized version of the email address argument.
 
 =item Emails ending in @aol. or @aol are fixed to be @aol.com.  Also done for hotmail.com, live.com & gmail.com.  
 
+=back
+
+=cut
+
 =head2 get_domain_from_email
+
+=over 4
 
 To extract the domain part and local part from an email address, use the function 
 get_domain_from_email with a single email address as the only argument:
@@ -869,7 +877,13 @@ Optionally, you can also receive the local part as well:
 
         ($local, $domain) = Net::validMX::get_domain_from_email('kevin.mcgrail@peregrinehw.com');
 
--head2 check_spf_for_domain
+=back
+
+=cut
+
+=head2 check_spf_for_domain
+
+=over 4
 
 To check if a domain is properly configured to send email, call the function check_spf_for_domain with a domain name as the only argument:
 
@@ -877,7 +891,13 @@ To check if a domain is properly configured to send email, call the function che
 
 check_spf_for_domain will return "valid", "suspect", or "bad" as the first value and a descriptive text message as warranted.
 
+=back
+
+=cut
+
 =head2 EXAMPLE
+
+=over 4
 
 The distribution contains an example program to demonstrate working functionality as well to utilize as a command line interface
 to query one or more email addresses.
@@ -891,6 +911,10 @@ or
 If you supply only one email address argument, the program will exit with a exit status of 0 for a success and 1 for a failure:
 
 	perl example/check_email_and_mx.pl kevin.mcgrail@failed || echo 'This email is no good'     
+
+=back
+
+=cut
 
 =head2 MIMEDEFANG
 
@@ -986,7 +1010,13 @@ MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 
 =item - Need to finish the ability to override default variables, procedural and OO methods and complete the documentation.
 
+=back
+
+=cut
+
 =head1 SOLVED TODO ITEMS
+
+=over 4
 
 =item - I'd like to convert the example script(s) into test script(s).  
 
@@ -996,14 +1026,20 @@ SOLVED: Test::More was a great way to achieve this!
 
 SOLVED: I was using MakeMaker v6.03.  Instead I upgraded to 6.30 and make dist or make distdir then created the META.yml file.  I also used a trick from Net::DNS' Makefile.PL to add the license, author and abstract data directly to the META.yml file.
 
-=item - I'd like to make it so that the Makefile.PL creates a README on the fly from the pod in the library instead of pod2text lib/Net/validMX.pm > README.
+=item - I'd like to make it so that the Makefile.PL creates a README on the fly from the pod in the library instead of pod2text lib/Net/validMX.pm E<gt> README.
 
 SOLVED: Thanks to Andreas J. Koenig for a post he wrote that dealt with my exact problem.  I added the PREOP and DIST_DEFAULT to the Makefile.PL.  I then modified this to use the same MANIFEST trick that is used for metafile and I'm happy with the end result.
 
 =back
 
+=cut
+
 =head1 CREDITS
 
+=over 4
+
 Based on an idea from Les Miksell and much input from Jan Pieter Cornet.  Additional thanks to David F. Skoll, Matthew van Eerde, and Mark Damrose for testing and suggestions, plus Bill Cole & Karsten Bräckelmann for code contributions.  And sincere apologies in advance if I missed anyone!
+
+=back
 
 =cut
