@@ -157,18 +157,13 @@ sub version      { $VERSION; }
 @EXPORT_OK = qw(check_valid_mx get_output_result check_email_and_mx check_email_validity get_domain_from_email);
 
 sub new {
-  my (%self) = @_;
+  my $self = bless {}, shift;
 
-  my ($self);
-
-  $DEBUG = $self{'debug'} if ($self{'debug'} ne '');
-  $ALLOW_IP_ADDRESS_AS_MX = $self{'allow_ip_address_as_mx'} if ($self{'allow_ip_address_as_mx'} ne '');
-  $FLAG_INTRANETS = $self{'flag_intranets'} if ($self{'flag_intranets'} ne '');
-  $RESOLUTION_PROBLEM_RETURN = $self{'resolution_problem_return'} if ($self{'resolution_problem_return'} ne '');
-  $QUERY_TIMEOUT = $self{'query_timeout'} if ($self{'query_timeout'} ne '');
-
-  $self = \%self;
-  bless $self;
+  $DEBUG = $self->{'debug'} if (defined $self->{'debug'} and $self->{'debug'} ne '');
+  $ALLOW_IP_ADDRESS_AS_MX = $self->{'allow_ip_address_as_mx'} if (defined $self->{'allow_ip_address_as_mx'} and $self->{'allow_ip_address_as_mx'} ne '');
+  $FLAG_INTRANETS = $self->{'flag_intranets'} if (defined $self->{'flag_intranets'} and $self->{'flag_intranets'} ne '');
+  $RESOLUTION_PROBLEM_RETURN = $self->{'resolution_problem_return'} if (defined $self->{'resolution_problem_return'} and $self->{'resolution_problem_return'} ne '');
+  $QUERY_TIMEOUT = $self->{'query_timeout'} if (defined $self->{'query_timeout'} and $self->{'query_timeout'} ne '');
 
   return $self;
 }
