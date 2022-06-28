@@ -454,7 +454,7 @@ sub check_valid_mx {
   return (1,'');
 }
 
-sub check_implicit_mx ($$) {
+sub check_implicit_mx {
   my ($SenderDomain, $res, $debug, $resolution_problem_return) = @_;
  
   my ($rv, $reason, $packet, @answer, @answer2, $resolution_problem_status);
@@ -528,7 +528,7 @@ sub check_implicit_mx ($$) {
     print "DEBUG: Test Failed - $reason\n" if $debug;
     return (0, $reason);
   }
-  return undef;
+  return;
 }
 
 sub invalid_mx {
@@ -742,7 +742,7 @@ sub dns_lookup {
 
 sub check_spf_for_domain {
   my ($domain, %params) = @_;
-  my ($dns, $query, $result, $spf_line, @clauses, $clause, $found_spf);
+  my ($dns, $query, $spf_line, @clauses, $found_spf);
 
   $dns = Net::DNS::Resolver->new;
   $query = $dns->search($domain, 'TXT');
@@ -751,7 +751,7 @@ sub check_spf_for_domain {
     return ("suspect", "no TXT record found");
   }
 
-  foreach $result ($query->answer) {
+  foreach my $result ($query->answer) {
     next unless $result->type eq 'TXT';
     $spf_line = $result->txtdata;
 
@@ -761,7 +761,7 @@ sub check_spf_for_domain {
       # split into clauses
       @clauses = split / /, $spf_line;
 
-      foreach $clause (@clauses) {
+      foreach my $clause (@clauses) {
         # ignore clauses that reject email - only false accepts are good spam indicators
         next if $clause =~ /^[-~]/;
         if ($clause =~ /^.?all/) {
