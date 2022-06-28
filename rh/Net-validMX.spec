@@ -9,8 +9,8 @@
 
 name:      perl-Net-validMX
 summary:   Net-validMX - Perl DNS mail exchange & email format validation module
-version:   2.5.0
-release:   1
+version:   2.5.1
+release:   0
 vendor:    The McGrail Foundation & Kevin A. McGrail <kevin.mcgrail-netvalidmx@mcgrail.com>
 packager:  The McGrail Foundation
 license:   Artistic
@@ -19,19 +19,13 @@ url:       http://www.cpan.org
 buildroot: %{_tmppath}/%{name}-%{version}-%(id -u -n)
 buildarch: noarch
 prefix:    %(echo %{_prefix})
-source:    https://cpan.metacpan.org/authors/id/K/KM/KMCGRAIL/validMX/Net-validMX-2.5.0.tar.gz
+source:    https://cpan.metacpan.org/authors/id/K/KM/KMCGRAIL/validMX/Net-validMX-2.5.1.tar.gz
 
 %description
 Net::validMX - I wanted the ability to use DNS to verify if an email address
 COULD be valid by checking for valid MX records.  This could be used for sender 
 verification for emails with a program such as MIMEDefang or for websites to 
 verify email addresses prior to registering users and/or sending a confirmation email.
-
-#
-# This package was generated automatically with the cpan2rpm
-# utility.  To get this software or for more information
-# please visit: http://perl.arix.com/
-#
 
 %prep
 %setup -q -n %{pkgname}-%{version} 
@@ -42,7 +36,7 @@ grep -rsl '^#!.*perl' . |
 grep -v '.bak$' |xargs --no-run-if-empty \
 %__perl -MExtUtils::MakeMaker -e 'MY->fixin(@ARGV)'
 CFLAGS="$RPM_OPT_FLAGS"
-%{__perl} Makefile.PL `%{__perl} -MExtUtils::MakeMaker -e ' print qq|PREFIX=%{buildroot}%{_prefix}| if \$ExtUtils::MakeMaker::VERSION =~ /5\.9[1-6]|6\.0[0-5]/ '`
+%{__perl} Makefile.PL PREFIX=%{_prefix} DESTDIR=$RPM_BUILD_ROOT < /dev/null
 %{__make} 
 %if %maketest
 %{__make} test
@@ -52,7 +46,7 @@ CFLAGS="$RPM_OPT_FLAGS"
 [ "%{buildroot}" != "/" ] && rm -rf %{buildroot}
 
 
-%{makeinstall} `%{__perl} -MExtUtils::MakeMaker -e ' print \$ExtUtils::MakeMaker::VERSION <= 6.05 ? qq|PREFIX=%{buildroot}%{_prefix}| : qq|DESTDIR=%{buildroot}| '`
+%{make_install} `%{__perl} -MExtUtils::MakeMaker -e ' print \$ExtUtils::MakeMaker::VERSION <= 6.05 ? qq|PREFIX=%{buildroot}%{_prefix}| : qq|DESTDIR=%{buildroot}| '`
 
 cmd=/usr/share/spec-helper/compress_files
 [ -x $cmd ] || cmd=/usr/lib/rpm/brp-compress
@@ -121,7 +115,10 @@ find %{buildroot}%{_prefix}             \
 %clean
 [ "%{buildroot}" != "/" ] && rm -rf %{buildroot}
 
-%files -f %filelist
+%files
+%{_bindir}/*
+%{_mandir}/*
+%{_prefix}/share/perl5/*
 %defattr(-,root,root)
 
 %changelog
