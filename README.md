@@ -84,8 +84,7 @@ USE
 
             ($local, $domain) = Net::validMX::get_domain_from_email('kevin.mcgrail@peregrinehw.com');
 
-    -head2 check_spf_for_domain
-
+  check_spf_for_domain
     To check if a domain is properly configured to send email, call the
     function check_spf_for_domain with a domain name as the only argument:
 
@@ -117,10 +116,13 @@ USE
     authorized senders for your particular setup and add the following code
     snippets to your mimedefang-filter:
 
-    sub filter_initialize { #for Check Valid MX use Net::validMX
-    qw(check_valid_mx); }
+    sub filter_initialize {
+      #for Check Valid MX
+      use Net::validMX qw(check_valid_mx);
+    }
 
-    sub is_authorized_sender { my ($sender, $RelayAddr) = @_;
+    sub is_authorized_sender {
+      my ($sender, $RelayAddr) = @_;
 
       if ([test for authorized user, private IP's, relay from 127.0.0.1, etc.]) {
         return 1;
@@ -129,16 +131,17 @@ USE
       }
     }
 
-    sub filter_sender { my ($sender, $ip, $hostname, $helo) = @_; my ($rv,
-    $reason); #md_syslog('warning', "Testing $sender, $ip, $hostname,
-    $helo");
+    sub filter_sender {
+      my ($sender, $ip, $hostname, $helo) = @_;
+      my ($rv, $reason);
+      #md_syslog('warning', "Testing $sender, $ip, $hostname, $helo");
 
-      if (&is_authorized_sender($sender, $RelayAddr)) {
+      if (is_authorized_sender($sender, $RelayAddr)) {
         return ('CONTINUE', "ok");
       }
 
       if ($sender ne '<>') {
-        ($rv, $reason) = &check_valid_mx($sender);
+        ($rv, $reason) = check_valid_mx($sender);
         unless ($rv) {
           md_syslog('warning', "Rejecting $sender - Invalid MX: $reason.");
           return ('REJECT', "Sorry; $sender has an invalid MX record: $reason.");
