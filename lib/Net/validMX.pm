@@ -430,6 +430,8 @@ sub check_valid_mx {
 
             # Keep looping, unless this was the last answer in the MX
             # resolution packet.
+            # XXX $packet->header->ancount, in the case of corrupt packets,
+            # may differ from the actual number of records and may return unwanted failures
             if ($i == $#answer) {
 
               #MX RECORD RETURNED DOES NOT RESOLVE
