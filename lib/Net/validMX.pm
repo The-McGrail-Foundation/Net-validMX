@@ -168,6 +168,15 @@ sub new {
   return $self;
 }
 
+sub get_debug {
+  return $DEBUG;
+}
+
+sub set_debug {
+  my $debug = shift;
+  $DEBUG = $debug;
+}
+
 sub get_output_result {
   my ($email, $rv, $reason) = @_;
   my ($output);
