@@ -6,9 +6,9 @@ name: CI for Net::validMX
 on:
   # Triggers the workflow on push or pull request events but only for the master branch
   push:
-    branches: [ main ]
+    branches: [ master ]
   pull_request:
-    branches: [ main ]
+    branches: [ master ]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -27,11 +27,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Install Perl modules
+      - name: install dependencies
         run: |
           sudo apt-get update
           sudo apt-get -y install libnet-dns-perl
-      - name: build code
-        run:  perl Makefile.PL && make
       - name: Regression tests
-        run:  make test
+        run: prove -lv t
