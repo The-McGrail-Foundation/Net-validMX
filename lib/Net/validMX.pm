@@ -127,6 +127,8 @@
 package Net::validMX;
 
 use strict;
+use warnings;
+
 use Net::DNS;
 
 use vars qw(
