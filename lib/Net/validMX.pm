@@ -346,7 +346,7 @@ sub check_valid_mx {
             @answer2 = $packet->answer;
 
             print "DEBUG: $i - Resolution type of ".$answer[$i]->exchange.": ".$answer2[0]->type."\n" if $params{'debug'}; 
-            if ($answer2[0]->type eq "A") {
+            if ($answer2[0]->type =~ /^A{1,4}/) {
               print "DEBUG: $i - A Name Address for ".$answer[$i]->exchange.": ".$answer2[0]->address."\n" if $params{'debug'};
               ($rv, $reason) = invalid_mx($answer2[0]->address);
               if ($rv == 1 or ($rv == 2 && $i == $#answer)) {
@@ -570,9 +570,19 @@ sub invalid_mx {
     return (2, "Invalid use of private IP (e.g. $ip) range for MX");
   }
 
+  #fd00::/8
+  if ($flag_intranets && $ip =~ /^fd00\:0\:/i) {
+    return (2, "Invalid use of private IP (e.g. $ip) range for MX");
+  }
+
   #DHCP auto-discover added per Matthew van Eerde recomendation 169.254/16
   if ($ip =~ /^169\.254\./) {
     return (1, "Invalid use of a DHCP auto-discover IP range ($ip) as an MX record");
+  }
+
+  #IPv6 link-local addresses fe80::/10
+  if ($ip =~ /^fe80\:0\:/i) {
+    return (1, "Invalid use of a link-local IP range ($ip) as an MX record");
   }
 
   #Multicast 224/8 through 239/8 added per Matthew van Eerde recomendation
