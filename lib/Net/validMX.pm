@@ -570,6 +570,11 @@ sub invalid_mx {
     return (2, "Invalid use of private IP (e.g. $ip) range for MX");
   }
 
+  #fc00::/7
+  if ($flag_intranets && $ip =~ /^fc00\:0\:/i) {
+    return (2, "Invalid use of unique local address (e.g. $ip) range for MX");
+  }
+
   #fd00::/8
   if ($flag_intranets && $ip =~ /^fd00\:0\:/i) {
     return (2, "Invalid use of private IP (e.g. $ip) range for MX");
