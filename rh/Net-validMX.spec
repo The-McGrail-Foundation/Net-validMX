@@ -19,7 +19,8 @@ url:       http://www.cpan.org
 buildroot: %{_tmppath}/%{name}-%{version}-%(id -u -n)
 buildarch: noarch
 prefix:    %(echo %{_prefix})
-source:    https://cpan.metacpan.org/authors/id/K/KM/KMCGRAIL/validMX/Net-validMX-2.5.1.tar.gz
+URL:            http://search.cpan.org/dist/Net-validMX/
+Source:        http://www.cpan.org/authors/id/G/GB/GBECHIS/Net-validMX-%{version}.tar.gz
 buildrequires:  perl-Net-DNS
 
 %description
