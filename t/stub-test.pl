@@ -11,10 +11,7 @@ print "DEBUG: Net::validMX::version: ".&Net::validMX::version()."\n\n";
 
 my ($rv, $reason, $valid);
 
-#OO METHOD - Set any settings you want here
 $valid = Net::validMX->new(allow_ip_address_as_mx=>0, debug=>1);
-
-print "OO\n";
 
 #FEEL FREE TO OVERRIDE SETTINGS PER FUNCTION AS WELL
 ($rv, $reason) = $valid->check_valid_mx(email=>'kevin@mcgrail.com', debug=>1, allow_ip_address_as_mx=>0);

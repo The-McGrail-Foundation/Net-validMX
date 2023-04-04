@@ -5,7 +5,10 @@ t/02-pass.t
 t/03-valid.t
 t/04-full.t
 t/05-email.t
+t/06-oo.t
 lib/Net/validMX.pm
 LICENSE
 Makefile.PL
 MANIFEST
+README.md
+rh/Net-validMX.spec

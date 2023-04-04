@@ -20,3 +20,5 @@ TODO
 ^#.*#$
 ^\.#
 \.swp$
+\.git/
+\.github/
