@@ -13,7 +13,6 @@ my (%MAKEFILE);
 		       'Test::More' =>0,
                        'Net::DNS' => 0.53
                      },
-  'linkext'       => { LINKTYPE=>'' },
   'dist'          => {
                        COMPRESS=>'gzip -9f', 
                        SUFFIX => 'gz', 
