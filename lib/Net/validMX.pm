@@ -703,14 +703,16 @@ sub check_email_validity {
       return 0;
     }
   
-    # PURGE ANYTHING EXITED BY BACKSLASH
-    $local =~ s/\\.//g;
+    # PURGE BACKSLASHES
+    $local =~ s/\\//g;
   
     # per RFC 3696 section 3 the local part of the email can be quoted, which allows any character to appear if inside quotes
     # PURGE BEGINNING AND END QUOTE IF IT CONTAINS QUOTES
     if ($local =~ /"/) {
-      $local =~ s/^"//g;
-      $local =~ s/"$//g;
+      if($local =~ /^".*"$/) {
+        $local =~ s/^"//g;
+        $local =~ s/"$//g;
+      }
   
       # IF IT STILL CONTAINS A QUOTE, IT IS INVALID, OTHERWISE THE LOCAL PART IS VALID
       if ($local =~ /"/) {
