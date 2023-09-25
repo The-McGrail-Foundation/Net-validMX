@@ -1015,6 +1015,8 @@ kevin.mcgrail-netvalidmx@mcgrail.com
 
 =item v2.5.1 Released April 4, 2023. Documentation bug fixes and ipv6 improvements.
 
+=item v2.5.2 Released September 25, 2023. check_email_validity fixes.
+
 =back
 
 =head1 HOMEPAGE
