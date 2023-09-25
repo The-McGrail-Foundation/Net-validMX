@@ -146,7 +146,7 @@ BEGIN {
     require Exporter;
 
     @ISA     = qw(Exporter DynaLoader);
-    $VERSION = '2.5.1';
+    $VERSION = '2.5.2';
     $DEBUG   = 0;
     $ALLOW_IP_ADDRESS_AS_MX = 1;
     $FLAG_INTRANETS = 1;
