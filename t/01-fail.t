@@ -65,4 +65,3 @@ is( test('test@test2.peregrinehw.com'), 0, 'Test for use of crazy things like 19
 is( test_email_validity(''), 0, 'Blank email addresses should fail');
 
 is( test_email_validity('foo\"@bar.org'), 0, 'Email addresses with double quotes should fail');
-pen(my $FD, '>', '/tmp/mx.log');i
