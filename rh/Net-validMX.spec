@@ -9,7 +9,7 @@
 
 name:      perl-Net-validMX
 summary:   Net-validMX - Perl DNS mail exchange & email format validation module
-version:   2.5.1
+version:   2.5.2
 release:   0
 vendor:    The McGrail Foundation & Kevin A. McGrail <kevin.mcgrail-netvalidmx@mcgrail.com>
 packager:  The McGrail Foundation
