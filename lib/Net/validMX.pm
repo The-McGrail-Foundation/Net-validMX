@@ -894,6 +894,8 @@ as warranted, and a sanitized version of the email address argument.
 
 =head2 get_domain_from_email
 
+Sub to extract the domain part and local part from an email address.
+
 =over 4
 
 To extract the domain part and local part from an email address, use the function 
@@ -913,6 +915,8 @@ Optionally, you can also receive the local part as well:
 
 =head2 check_spf_for_domain
 
+Sub to check spf record of a domain.
+
 =over 4
 
 To check if a domain is properly configured to send email, call the function check_spf_for_domain with a domain name as the only argument:
@@ -922,6 +926,16 @@ To check if a domain is properly configured to send email, call the function che
 check_spf_for_domain will return "valid", "suspect", or "bad" as the first value and a descriptive text message as warranted.
 
 =back
+
+=cut
+
+=head2 get_output_result
+
+Sub that returns a formatted string with the reason why an email address is not valid.
+
+To print the reason why an email address is not valid, call the function get_output_result with email address, return code and reason as arguments.
+
+	print Net::validMX::get_output_result($sanitized_email, $rv, $reason);
 
 =cut
 
