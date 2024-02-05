@@ -668,6 +668,8 @@ sub check_email_validity {
   #allows an email address that contains -()/!#$%&*+~. A through Z a through Z and 0 through 9 in a format of [valid]@([valid].[valid]...).[valid].  = will also be
   #allowed in the username.   Thanks to Paul Whittney for reporting the issue.
 
+  return 0 if not defined $email;
+
   #PER WIKIPEDIA
   #Per Wikipedia:
 
