@@ -187,6 +187,7 @@ UPDATE HISTORY
     Foundation.  
     v2.5.1 Released April 4, 2023. Documentation bug fixes and improved ipv6 support.  
     v2.5.2 Released September 25, 2023. Email validity fixes.  
+    v2.6.0 Released November 18, 2026. check_valid_mx can use a resolver passed by the caller.  Null MX records are detected with recent Net::DNS versions, which return '.' as their exchange.
     This product is in active use in production system.  
 
 HOMEPAGE
