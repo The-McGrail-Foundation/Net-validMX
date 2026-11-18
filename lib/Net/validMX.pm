@@ -147,7 +147,7 @@ BEGIN {
     require Exporter;
 
     @ISA     = qw(Exporter DynaLoader);
-    $VERSION = '2.6.0';
+    $VERSION = '2.6.1';
     $DEBUG   = 0;
     $ALLOW_IP_ADDRESS_AS_MX = 1;
     $FLAG_INTRANETS = 1;
@@ -159,6 +159,48 @@ BEGIN {
 sub version      { $VERSION; }
 
 @EXPORT_OK = qw(check_valid_mx get_output_result check_email_and_mx check_email_validity get_domain_from_email);
+
+# Arguments of the public subs: either the historical positional list or
+# key => value pairs.  The named form is used when there is an even number
+# of arguments and the first one is a known key name, otherwise the
+# arguments are mapped onto the positional names.  With $trailing_pairs
+# set, the arguments after the positional ones are key => value pairs, as
+# in ($email, %params).
+sub _args {
+  my ($args, $positional, $named_only, $trailing_pairs) = @_;
+  my %known = map { $_ => 1 } @$positional, @{$named_only || []};
+  my %params;
+
+  if (@$args and @$args % 2 == 0 and defined $args->[0] and not ref $args->[0] and $known{$args->[0]}) {
+    %params = @$args;
+  } else {
+    my @args = @$args;
+    foreach my $name (@$positional) {
+      last unless @args;
+      $params{$name} = shift @args;
+    }
+    %params = (@args, %params) if ($trailing_pairs and @args);
+  }
+
+  return %params;
+}
+
+sub _default_resolver {
+  my ($query_timeout) = @_;
+  my $res = Net::DNS::Resolver->new;
+
+  if (defined ($res)) {
+    $res->defnames(0);		       #Turn off appending the default domain for names that have no dots just in case
+    $res->searchlist();		       #Set the search list to undefined just in case
+
+				       #We have also set the default timeout to only 4 seconds which means we might get network
+                                       #delays which we do not want to handle as an error.
+    $res->tcp_timeout($query_timeout);              #Number of Seconds before query will fail
+    $res->udp_timeout($query_timeout);              #Number of Seconds before query will fail
+  }
+
+  return $res;
+}
 
 sub new {
   my ($class, %params) = @_;
@@ -178,16 +220,17 @@ sub get_debug {
 }
 
 sub set_debug {
-  my $debug = shift;
-  $DEBUG = $debug;
+  my %params = _args(\@_, ['debug']);
+  $DEBUG = $params{'debug'};
 }
 
 sub get_output_result {
-  my ($email, $rv, $reason) = @_;
+  my %params = _args(\@_, ['email', 'rv', 'reason']);
+  my ($email, $rv, $reason) = @params{'email', 'rv', 'reason'};
   my ($output);
 
   $output = "$email\n\tValid MX? ".Net::validMX::int_to_truefalse($rv);
-  if ($reason ne '') {
+  if (defined $reason and $reason ne '') {
     $output .= " - $reason";
   }
   $output .=  "\n\n";
@@ -249,16 +292,7 @@ sub check_valid_mx {
     $res = $params{'resolver'};
     print "DEBUG: using the resolver passed by the caller, query_timeout is not applied\n" if $params{'debug'};
   } else {
-    $res = Net::DNS::Resolver->new;
-    if (defined ($res)) {
-      $res->defnames(0);		       #Turn off appending the default domain for names that have no dots just in case
-      $res->searchlist();		       #Set the search list to undefined just in case
-
-				       #We have also set the default timeout to only 4 seconds which means we might get network 
-                                       #delays which we do not want to handle as an error.
-      $res->tcp_timeout($params{'query_timeout'});              #Number of Seconds before query will fail
-      $res->udp_timeout($params{'query_timeout'});              #Number of Seconds before query will fail
-    }
+    $res = _default_resolver($params{'query_timeout'});
   }
 
   if (defined ($res)) {
@@ -487,12 +521,16 @@ sub _blank_exchange {
 }
 
 sub check_implicit_mx {
-  my ($SenderDomain, $res, $debug, $resolution_problem_return) = @_;
- 
+  my %params = _args(\@_, ['domain', 'resolver', 'debug', 'resolution_problem_return'], ['query_timeout']);
+  my ($SenderDomain, $res, $debug, $resolution_problem_return) = @params{'domain', 'resolver', 'debug', 'resolution_problem_return'};
+
   my ($rv, $reason, $packet, @answer, @answer2, $resolution_problem_status);
 
   #CONSTANTS/SETTABLE OPTIONS
   $resolution_problem_return ||= $RESOLUTION_PROBLEM_RETURN;
+  $res = $RESOLVER unless (defined $res);
+  $res = _default_resolver(defined $params{'query_timeout'} ? $params{'query_timeout'} : $QUERY_TIMEOUT) unless (defined $res);
+  return ($resolution_problem_return, 'Test '.($resolution_problem_return > 0 ? 'Passed' : 'Failed').' due to a Resolution Problem') unless (defined $res);
 
   if ($resolution_problem_return > 0) {
     $resolution_problem_status = 'Passed';
@@ -564,7 +602,8 @@ sub check_implicit_mx {
 }
 
 sub invalid_mx {
-  my ($ip) = @_;
+  my %params = _args(\@_, ['ip']);
+  my $ip = $params{'ip'};
   my ($flag_intranets);
 
   #UPDATED MORE ON 11-18-2011 based on RFC 5735
@@ -634,7 +673,8 @@ sub invalid_mx {
 }
 
 sub int_to_truefalse {
-  my ($int) = @_;
+  my %params = _args(\@_, ['rv']);
+  my $int = $params{'rv'};
 
   if ($int) {
     return "True";
@@ -643,9 +683,17 @@ sub int_to_truefalse {
   }
 }
 
+my @CHECK_VALID_MX_OPTIONS = qw(resolver debug allow_ip_address_as_mx resolution_problem_return query_timeout);
+
 sub check_email_and_mx {
-  my ($email) = @_;
-  my ($rv, $fail_reason, $status, $debug);
+  my %params = _args(\@_, ['email'], \@CHECK_VALID_MX_OPTIONS);
+  my $email = $params{'email'};
+  my ($rv, $fail_reason, $status, $debug, %mx_options);
+
+  #OPTIONS FORWARDED TO check_valid_mx
+  foreach my $option (@CHECK_VALID_MX_OPTIONS) {
+    $mx_options{$option} = $params{$option} if (defined $params{$option});
+  }
 
   $debug = 0;
 
@@ -671,7 +719,11 @@ sub check_email_and_mx {
   }
 
   # CHECK FOR VALID MX RECORD
-  ($rv, $fail_reason) = Net::validMX::check_valid_mx($email);
+  if (%mx_options) {
+    ($rv, $fail_reason) = Net::validMX::check_valid_mx(email => $email, %mx_options);
+  } else {
+    ($rv, $fail_reason) = Net::validMX::check_valid_mx($email);
+  }
 
   if ($rv < 1) {
     return($rv, $fail_reason, $email);
@@ -681,7 +733,8 @@ sub check_email_and_mx {
 }
 
 sub check_email_validity {
-  my ($email) = @_;
+  my %params = _args(\@_, ['email']);
+  my $email = $params{'email'};
   my ($local);
 
   #allows an email address that contains -()/!#$%&*+~. A through Z a through Z and 0 through 9 in a format of [valid]@([valid].[valid]...).[valid].  = will also be
@@ -757,7 +810,8 @@ sub check_email_validity {
 
 #get domain name from an email address
 sub get_domain_from_email {
-  my ($email, %params) = @_;
+  my %params = _args(\@_, ['email'], ['debug'], 1);
+  my $email = $params{'email'};
 
   my ($domain, $local);
 
@@ -779,7 +833,8 @@ sub get_domain_from_email {
 }
 
 sub dns_lookup {
-  my ($domain, $type) = @_;
+  my %params = _args(\@_, ['domain', 'type']);
+  my ($domain, $type) = @params{'domain', 'type'};
   my ($dns, $query);
 
   $dns = Net::DNS::Resolver->new;
@@ -792,7 +847,8 @@ sub dns_lookup {
 }
 
 sub check_spf_for_domain {
-  my ($domain, %params) = @_;
+  my %params = _args(\@_, ['domain'], [], 1);
+  my $domain = $params{'domain'};
   my ($dns, $query, $spf_line, @clauses, $found_spf);
 
   $dns = Net::DNS::Resolver->new;
@@ -869,6 +925,16 @@ To use the module in your programs you will use the line:
 
 	use Net::validMX;
 
+All the functions accept their arguments either as a positional list, as
+shown in each section, or as named C<key =E<gt> value> pairs, for example:
+
+	($rv, $reason, $sanitized_email) = Net::validMX::check_email_and_mx(email => 'kevin.mcgrail@peregrinehw.com');
+	print Net::validMX::get_output_result(email => $sanitized_email, rv => $rv, reason => $reason);
+
+The named form is used when the first argument is one of the key names
+of the function and the number of arguments is even; the positional form
+is kept for backward compatibility.
+
 =head2 check_valid_mx
 
 To check if an email address could be valid by checking the DNS, call
@@ -903,7 +969,8 @@ search list to the names it looks up.
 To check if an email address is formatted correctly, call the function
 check_email_validity with a single email address as the only argument:
 
-	$rv = Net::validMX::check_valid_mx('kevin.mcgrail@peregrinehw.com');
+	$rv = Net::validMX::check_email_validity('kevin.mcgrail@peregrinehw.com');
+	$rv = Net::validMX::check_email_validity(email => 'kevin.mcgrail@peregrinehw.com');
 
 check_email_validity will return a true/false integer where E<gt> 0 indicates that the email address looks valid.
 
@@ -913,10 +980,16 @@ check_email_validity will return a true/false integer where E<gt> 0 indicates th
 To check if an email address is formatted correctly, sanitize the email address some common end-user errors(*) and run check_valid_mx all from a single function, 
 use the function check_email_and_mx with a single email address as the only argument:
 
-        ($rv, $reason, $sanitized_email) = Net::validMX::check_valid_mx('kevin.mcgrail@peregrinehw.com');
+	($rv, $reason, $sanitized_email) = Net::validMX::check_email_and_mx('kevin.mcgrail@peregrinehw.com');
 
-check_email_and_mx will return a true/false integer where E<gt> 0 indicates that the email address looks valid, a descriptive text message 
+check_email_and_mx will return a true/false integer where E<gt> 0 indicates that the email address looks valid, a descriptive text message
 as warranted, and a sanitized version of the email address argument.
+
+With the named form the options of check_valid_mx (C<resolver>, C<debug>,
+C<allow_ip_address_as_mx>, C<resolution_problem_return> and C<query_timeout>)
+can be passed too, and they are forwarded to check_valid_mx:
+
+	($rv, $reason, $sanitized_email) = Net::validMX::check_email_and_mx(email => 'kevin.mcgrail@peregrinehw.com', resolver => $res);
 
 (*) Common end-user errors that are fixed: 
 
@@ -945,7 +1018,11 @@ get_domain_from_email will return a string with the domain part of the email add
 
 Optionally, you can also receive the local part as well:
 
-        ($local, $domain) = Net::validMX::get_domain_from_email('kevin.mcgrail@peregrinehw.com');
+	($local, $domain) = Net::validMX::get_domain_from_email('kevin.mcgrail@peregrinehw.com');
+
+or with named arguments:
+
+	$domain = Net::validMX::get_domain_from_email(email => 'kevin.mcgrail@peregrinehw.com', debug => 1);
 
 =back
 
@@ -960,6 +1037,7 @@ Sub to check spf record of a domain.
 To check if a domain is properly configured to send email, call the function check_spf_for_domain with a domain name as the only argument:
 
 	($rv, $reason) = Net::validMX::check_spf_for_domain('peregrinehw.com');
+	($rv, $reason) = Net::validMX::check_spf_for_domain(domain => 'peregrinehw.com');
 
 check_spf_for_domain will return "valid", "suspect", or "bad" as the first value and a descriptive text message as warranted.
 
@@ -974,6 +1052,62 @@ Sub that returns a formatted string with the reason why an email address is not 
 To print the reason why an email address is not valid, call the function get_output_result with email address, return code and reason as arguments.
 
 	print Net::validMX::get_output_result($sanitized_email, $rv, $reason);
+
+Note that the positional order (email, return code, reason) is not the
+order in which check_email_and_mx returns the same values (return code,
+reason, email); it is kept for backward compatibility.  The named form
+avoids any confusion:
+
+	print Net::validMX::get_output_result(email => $sanitized_email, rv => $rv, reason => $reason);
+
+=cut
+
+=head2 check_implicit_mx
+
+Sub that checks the implicit MX (the A record) of a domain that has no MX records:
+
+	($rv, $reason) = Net::validMX::check_implicit_mx($domain, $res, $debug, $resolution_problem_return);
+	($rv, $reason) = Net::validMX::check_implicit_mx(domain => $domain, resolver => $res);
+
+When no resolver is given, C<$Net::validMX::RESOLVER> or a new Net::DNS::Resolver is used.
+
+=cut
+
+=head2 invalid_mx
+
+Sub that checks if an IP address can not be used as a mail exchanger:
+
+	($rv, $reason) = Net::validMX::invalid_mx('10.0.0.1');
+	($rv, $reason) = Net::validMX::invalid_mx(ip => '10.0.0.1');
+
+invalid_mx returns 0 for a usable address, otherwise a value E<gt> 0 and the reason.
+
+=cut
+
+=head2 dns_lookup
+
+Sub that returns the answer records of a DNS query:
+
+	@answer = Net::validMX::dns_lookup('peregrinehw.com', 'MX');
+	@answer = Net::validMX::dns_lookup(domain => 'peregrinehw.com', type => 'MX');
+
+=cut
+
+=head2 int_to_truefalse
+
+Sub that returns "True" or "False" for a return code:
+
+	$text = Net::validMX::int_to_truefalse($rv);
+	$text = Net::validMX::int_to_truefalse(rv => $rv);
+
+=cut
+
+=head2 set_debug, get_debug, version
+
+	Net::validMX::set_debug(1);
+	Net::validMX::set_debug(debug => 1);
+	$debug = Net::validMX::get_debug();
+	$version = Net::validMX::version();
 
 =cut
 
@@ -1036,6 +1170,10 @@ sub filter_sender {
 }
 
 
+=head1 SEE ALSO
+
+L<Net::DNS>, L<Email::Valid>, L<Mail::CheckUser>, L<Mail::SPF>
+
 =head1 COPYRIGHT & LICENSE
 
 Copyright (c) 2020 The McGrail Foundation and Kevin A. McGrail.  All rights reserved.
@@ -1070,6 +1208,8 @@ kevin.mcgrail-netvalidmx@mcgrail.com
 =item v2.5.2 Released September 25, 2023. check_email_validity fixes.
 
 =item v2.6.0 Released November 18, 2026. check_valid_mx can use a resolver passed by the caller.  Null MX records are detected with recent Net::DNS versions, which return '.' as their exchange.
+
+=item v2.6.1 Released November 18, 2026.  All the functions accept named arguments as well as positional ones.  check_email_and_mx forwards the check_valid_mx options.  Documentation fixes and a SEE ALSO section.
 
 =back
 
