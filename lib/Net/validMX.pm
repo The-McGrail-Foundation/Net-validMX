@@ -139,19 +139,21 @@ use vars qw(
     $ALLOW_IP_ADDRESS_AS_MX
     $FLAG_INTRANETS
     $RESOLUTION_PROBLEM_RETURN
-    $QUERY_TIMEOUT);
+    $QUERY_TIMEOUT
+    $RESOLVER);
 
 BEGIN {
     require DynaLoader;
     require Exporter;
 
     @ISA     = qw(Exporter DynaLoader);
-    $VERSION = '2.5.2';
+    $VERSION = '2.6.0';
     $DEBUG   = 0;
     $ALLOW_IP_ADDRESS_AS_MX = 1;
     $FLAG_INTRANETS = 1;
     $RESOLUTION_PROBLEM_RETURN = 1;
     $QUERY_TIMEOUT = 4;
+    $RESOLVER = undef;
 }
 
 sub version      { $VERSION; }
@@ -159,7 +161,8 @@ sub version      { $VERSION; }
 @EXPORT_OK = qw(check_valid_mx get_output_result check_email_and_mx check_email_validity get_domain_from_email);
 
 sub new {
-  my $self = bless {}, shift;
+  my ($class, %params) = @_;
+  my $self = bless {%params}, $class;
 
   $DEBUG = $self->{'debug'} if (defined $self->{'debug'} and $self->{'debug'} ne '');
   $ALLOW_IP_ADDRESS_AS_MX = $self->{'allow_ip_address_as_mx'} if (defined $self->{'allow_ip_address_as_mx'} and $self->{'allow_ip_address_as_mx'} ne '');
@@ -224,6 +227,8 @@ sub check_valid_mx {
   $params{'allow_ip_address_as_mx'} = $ALLOW_IP_ADDRESS_AS_MX unless (defined $params{'allow_ip_address_as_mx'});
   $params{'resolution_problem_return'} = $RESOLUTION_PROBLEM_RETURN unless (defined $params{'resolution_problem_return'});
   $params{'query_timeout'} = $QUERY_TIMEOUT unless (defined $params{'query_timeout'});
+  $params{'resolver'} = $self->{'resolver'} if (not defined $params{'resolver'} and defined $self);
+  $params{'resolver'} = $RESOLVER unless (defined $params{'resolver'});
 
   if ($params{'resolution_problem_return'} > 0) {
     $resolution_problem_status = 'Passed';
@@ -239,18 +244,25 @@ sub check_valid_mx {
   #FLAGS - I THINK THIS HAS A LOGIC ISSUE - I LIKELY MEANT ALLOW_IMPLICIT_MX as an option  FIX
   $check_implicit_mx = 0;
 
-  #Setup a DNS Resolver Resource
-  $res = Net::DNS::Resolver->new;
-
-  if (defined ($res)) {
-    $check_implicit_mx = 0;
-    $res->defnames(0);		       #Turn off appending the default domain for names that have no dots just in case
-    $res->searchlist();		       #Set the search list to undefined just in case
+  #Setup a DNS Resolver Resource, a resolver passed by the caller is used as is
+  if (defined $params{'resolver'}) {
+    $res = $params{'resolver'};
+    print "DEBUG: using the resolver passed by the caller, query_timeout is not applied\n" if $params{'debug'};
+  } else {
+    $res = Net::DNS::Resolver->new;
+    if (defined ($res)) {
+      $res->defnames(0);		       #Turn off appending the default domain for names that have no dots just in case
+      $res->searchlist();		       #Set the search list to undefined just in case
 
 				       #We have also set the default timeout to only 4 seconds which means we might get network 
                                        #delays which we do not want to handle as an error.
-    $res->tcp_timeout($params{'query_timeout'});              #Number of Seconds before query will fail
-    $res->udp_timeout($params{'query_timeout'});              #Number of Seconds before query will fail
+      $res->tcp_timeout($params{'query_timeout'});              #Number of Seconds before query will fail
+      $res->udp_timeout($params{'query_timeout'});              #Number of Seconds before query will fail
+    }
+  }
+
+  if (defined ($res)) {
+    $check_implicit_mx = 0;
 
     #Strip domain name from an email address
     $domain = get_domain_from_email($params{'email'});
@@ -310,7 +322,7 @@ sub check_valid_mx {
           } 
 
           #IF the exchange is blank and the priority is 0 and it's the last answer, let's fail 
-          if ($answer[$i]->exchange eq '' && int($answer[$i]->preference) == 0 && $i == $#answer) {
+          if (_blank_exchange($answer[$i]) && int($answer[$i]->preference) == 0 && $i == $#answer) {
             #Test if there is a Blank MX record in the first slot Per Jan-Pieter Cornet recommendation
             #and based on http://ietfreport.isoc.org/all-ids/draft-delany-nullmx-00.txt
             $reason = 'Domain is publishing a blank MX record at Priority 0';
@@ -319,7 +331,7 @@ sub check_valid_mx {
           }
 
           #resolve the exchange record
-          if ($answer[$i]->exchange ne '' and $answer[$i]->exchange !~ /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/) {
+          if (!_blank_exchange($answer[$i]) and $answer[$i]->exchange !~ /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/) {
             $packet = $res->send($answer[$i]->exchange, 'A'); 
  
             if (!defined ($packet)) {
@@ -411,7 +423,7 @@ sub check_valid_mx {
           } else { # ! $packet->header->ancount > 0
 
             #IF THIS IS THE LAST MX RECORD AND THE EXCHANGE IS BLANK, WE FAIL IT
-            if ($answer[$i]->exchange eq '') {
+            if (_blank_exchange($answer[$i])) {
               if ($i == $#answer) {
                 $reason = 'Domain is publishing only invalid and/or blank MX records'; 
                 print "DEBUG: Test Failed - $reason\n" if $params{'debug'};
@@ -465,6 +477,13 @@ sub check_valid_mx {
 
   print "DEBUG: Test Passed\n" if $params{'debug'};
   return (1,'');
+}
+
+# Null MX (RFC 7505), recent Net::DNS versions return '.' instead of ''
+sub _blank_exchange {
+  my ($rr) = @_;
+  my $exchange = $rr->exchange;
+  return (!defined $exchange or $exchange eq '' or $exchange eq '.') ? 1 : 0;
 }
 
 sub check_implicit_mx {
@@ -861,6 +880,23 @@ check_valid_mx will return a true/false integer as the first value and a descrip
 
 NOTE: In the event of a DNS resolution problem, we do NOT return a failure.  We return a success to prevent DNS outages and delays from producing too many false positives.
 
+By default a new Net::DNS::Resolver is created for every call.  To reuse a
+resolver (for example one that caches answers) pass it with the C<resolver>
+parameter, set it once in C<$Net::validMX::RESOLVER>, or pass it to C<new>
+when using the OO interface:
+
+	($rv, $reason) = Net::validMX::check_valid_mx(email => 'kevin.mcgrail@peregrinehw.com', resolver => $res);
+
+	$Net::validMX::RESOLVER = $res;
+
+	my $validmx = Net::validMX->new(resolver => $res);
+	($rv, $reason) = $validmx->check_valid_mx(email => 'kevin.mcgrail@peregrinehw.com');
+
+The object only needs a C<send($name, $type)> method returning a
+Net::DNS::Packet (or undef on errors).  It is used as is: C<query_timeout>
+is not applied to it and it should not append a default domain or a
+search list to the names it looks up.
+
 
 =head2 check_email_validity
 
@@ -1032,6 +1068,8 @@ kevin.mcgrail-netvalidmx@mcgrail.com
 =item v2.5.1 Released April 4, 2023. Documentation bug fixes and ipv6 improvements.
 
 =item v2.5.2 Released September 25, 2023. check_email_validity fixes.
+
+=item v2.6.0 Released November 18, 2026. check_valid_mx can use a resolver passed by the caller.  Null MX records are detected with recent Net::DNS versions, which return '.' as their exchange.
 
 =back
 
